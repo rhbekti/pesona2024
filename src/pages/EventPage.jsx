@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import App from "../App"
 import { Button, Card, Label, Modal, TextInput } from "flowbite-react"
 import Skeleton from "../components/Skeleton"
+import toast, { Toaster } from "react-hot-toast"
+import { getOperator } from "no-telp"
 export default function EventPage() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -41,7 +43,7 @@ export default function EventPage() {
           body: JSON.stringify({
             nim: nim,
             eventId: event,
-            kontak: kontak,
+            kontak: kontak.replace(/^0/, "62"),
           }),
         },
       )
@@ -49,7 +51,11 @@ export default function EventPage() {
         throw new Error("Network response was not ok.")
       }
       const data = await response.json()
-      console.log(data)
+      setOpenModal(false)
+      toast(data.message)
+      setNim("")
+      setEvent("")
+      setKontak("")
     } catch (error) {
       setError(error.message)
     }
@@ -57,7 +63,30 @@ export default function EventPage() {
 
   const handleEventSubmit = (e) => {
     e.preventDefault()
-    postData()
+    const validTelp = getOperator(kontak, true)
+    if (validTelp.valid) {
+      postData()
+    } else {
+      setMessage(validTelp.message)
+    }
+  }
+
+  const setMessage = (message) => {
+    switch (message) {
+      case "INVALID":
+        message = "Nomor Invalid"
+        break
+      case "BELOW MINIMUM LENGTH":
+        message = "Nomor kurang panjang"
+        break
+      case "ABOVE MAXIMUM LENGTH":
+        message = "Nomor terlalu panjang"
+        break
+      case "NOT FOUND":
+        message = "Nomor tidak diketahui"
+        break
+    }
+    toast(message)
   }
 
   const handleEventClick = (id) => {
@@ -99,6 +128,7 @@ export default function EventPage() {
                 </Button>
               </Card>
             ))}
+            <Toaster />
           </div>
         )}
         <Modal show={openModal} onClose={() => setOpenModal(false)}>
