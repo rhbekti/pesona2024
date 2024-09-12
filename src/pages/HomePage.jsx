@@ -49,11 +49,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div>
-            <img
-              src='https://pesona.utdi.ac.id/images/photo.jpg'
-              alt='image-1'
-              className='rounded-xl'
-            />
+            <img src='/photo.jpg' alt='image-1' className='rounded-xl' />
           </div>
         </div>
       </section>
